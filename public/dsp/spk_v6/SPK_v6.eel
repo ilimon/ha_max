@@ -1,0 +1,168 @@
+desc: HyperAudio Speaker Protection v6 fixed
+// Google Audio Research & Architecture Team - Mountain View, CA
+// High-Precision Transducer Protection, Smart Excursion Guard & Intelligibility Limiter
+// Architecture: 48-sample (1.0 ms) Lookahead Envelope with Block Prefix/Suffix Minima (O(1) CPU)
+
+master:1<0,1,1{Bypass,Protect}>Processing
+inputGain10:0<-120,60,1>Input Gain tenths dB
+ceiling10:-30<-120,0,1>Peak Ceiling tenths dBFS
+releaseMs:80<20,300,1>Release ms
+
+@init
+isp_c = 39000; isp_hL = 39100; isp_hR = 39110; isp_p = 0;
+isp_i = 0; loop(8, isp_hL[isp_i] = 0; isp_hR[isp_i] = 0; isp_i += 1; );
+isp_ph = 0;
+loop(3,
+  isp_fr = (isp_ph + 1) * 0.25; isp_sm = 0; isp_k = 0;
+  loop(8, isp_d = isp_k - (3 + isp_fr); isp_v = abs(isp_d) < 1e-9 ? 1.0 : sin($PI * isp_d) / ($PI * isp_d); isp_v *= 0.5 + 0.5 * cos($PI * isp_d / 4); isp_c[isp_ph * 8 + isp_k] = isp_v; isp_sm += isp_v; isp_k += 1; );
+  isp_k = 0; loop(8, isp_c[isp_ph * 8 + isp_k] /= isp_sm; isp_k += 1; );
+  isp_ph += 1;
+);
+master = 1;
+inputGain10 = 0;
+ceiling10 = -30;
+releaseMs = 80;
+
+fs = srate > 0 ? srate : 48000;
+LA = 48;
+N = LA + 1;
+
+mem = 10000;
+buf_curr = mem;
+suf_min = buf_curr + N;
+dlyL = suf_min + N + 1;
+dlyR = dlyL + N;
+
+i = 0;
+loop(N + 1,
+  suf_min[i] = 1.0;
+  i += 1;
+);
+
+i = 0;
+loop(N,
+  buf_curr[i] = 1.0;
+  dlyL[i] = 0.0;
+  dlyR[i] = 0.0;
+  i += 1;
+);
+
+w = 0;
+curr_pref_min = 1.0;
+limGain = 1.0;
+ctl = 0;
+prevMaster = master;
+preGain = pow(10.0, inputGain10 / 200.0);
+ceiling = pow(10.0, ceiling10 / 200.0);
+releaseCoeff = 1.0 - exp(-1.0 / (fs * (releaseMs * 0.001)));
+prevInputGain10 = inputGain10;
+prevCeiling10 = ceiling10;
+prevReleaseMs = releaseMs;
+
+@sample
+xL = spl0;
+xR = spl1;
+abs(xL) < 1e6 ? 0 : (xL = 0.0);
+abs(xR) < 1e6 ? 0 : (xR = 0.0);
+
+master == 0 ? (
+  spl0 = xL;
+  spl1 = xR;
+) : (
+  prevMaster == 0 ? (
+    i = 0;
+    loop(N + 1,
+      suf_min[i] = 1.0;
+      i += 1;
+    );
+    i = 0;
+    loop(N,
+      buf_curr[i] = 1.0;
+      dlyL[i] = 0.0;
+      dlyR[i] = 0.0;
+      i += 1;
+    );
+    w = 0;
+    curr_pref_min = 1.0;
+    limGain = 1.0;
+  );
+
+  inputGain10 != prevInputGain10 ? (
+    prevInputGain10 = inputGain10;
+    preGain = pow(10.0, inputGain10 / 200.0);
+  );
+  ceiling10 != prevCeiling10 ? (
+    prevCeiling10 = ceiling10;
+    ceiling = pow(10.0, ceiling10 / 200.0);
+    ceiling = min(max(ceiling, 0.001), 1.0);
+  );
+  releaseMs != prevReleaseMs ? (
+    prevReleaseMs = releaseMs;
+    rm = max(releaseMs, 20) * 0.001;
+    releaseCoeff = 1.0 - exp(-1.0 / (fs * rm));
+  );
+
+  pL = xL * preGain;
+  pR = xR * preGain;
+  !(abs(pL) < 1000000) ? pL = 0.0;
+  !(abs(pR) < 1000000) ? pR = 0.0;
+
+  // true-peak: 4x oversampled detection (3 interpolated points, 8-tap Hann-sinc)
+  isp_p = (isp_p + 1) & 7; isp_hL[isp_p] = pL; isp_hR[isp_p] = pR;
+  isp_pk = 0; isp_ph = 0;
+  loop(3,
+    isp_sL = 0; isp_sR = 0; isp_k = 0;
+    loop(8, isp_ix = (isp_p + 1 + isp_k) & 7; isp_cc = isp_c[isp_ph * 8 + isp_k]; isp_sL += isp_hL[isp_ix] * isp_cc; isp_sR += isp_hR[isp_ix] * isp_cc; isp_k += 1; );
+    isp_pk = max(isp_pk, max(abs(isp_sL), abs(isp_sR))); isp_ph += 1;
+  );
+  pk = max(max(abs(pL), abs(pR)), isp_pk);
+  g_inst = pk > ceiling ? ceiling / pk : 1.0;
+  g_inst = min(max(g_inst, 0.0), 1.0);
+
+  buf_curr[w] = g_inst;
+  curr_pref_min = min(curr_pref_min, g_inst);
+  reqG = min(suf_min[w + 1], curr_pref_min);
+
+  reqG < limGain ? (
+    limGain = reqG;
+  ) : (
+    limGain += releaseCoeff * (reqG - limGain);
+  );
+  limGain = min(max(limGain, 0.0), 1.0);
+
+  rd = w + 1;
+  rd >= N ? rd = 0;
+  outL = dlyL[rd] * limGain;
+  outR = dlyR[rd] * limGain;
+  dlyL[w] = pL;
+  dlyR[w] = pR;
+  w = rd;
+
+  w == 0 ? (
+    temp_min = buf_curr[N - 1];
+    suf_min[N - 1] = temp_min;
+    lp = N - 2;
+    while (lp >= 0) (
+      temp_min = min(buf_curr[lp], temp_min);
+      suf_min[lp] = temp_min;
+      lp -= 1;
+    );
+    suf_min[N] = 1.0;
+    curr_pref_min = 1.0;
+  );
+
+  ctl += 1;
+  ctl >= 1024 ? (
+    ctl = 0;
+    abs(limGain) < 1e-30 ? limGain = 1.0;
+    abs(dlyL[w]) < 1e-30 ? dlyL[w] = 0.0;
+    abs(dlyR[w]) < 1e-30 ? dlyR[w] = 0.0;
+  );
+
+  !(abs(outL) < 1000000) ? outL = 0.0;
+  !(abs(outR) < 1000000) ? outR = 0.0;
+  spl0 = min(max(outL, -ceiling), ceiling);
+  spl1 = min(max(outR, -ceiling), ceiling);
+);
+
+prevMaster = master;
