@@ -1,0 +1,6 @@
+{
+  "name": "HyperAudio",
+  "description": "Measurement-driven RootlessJamesDSP chains for the KZ EDX Pro IEM and Redmi 12 speaker. Offline in-browser file verification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

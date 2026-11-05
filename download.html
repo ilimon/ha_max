@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direct Download — Google-Grade HyperAudio DSP Trios</title>
+<script>
+document.documentElement.dataset.theme = (function() {
+  try { return localStorage.theme; } catch(e) {}
+})() || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+</script>
+<style>
+  :root {
+    --bg: #090d0c;
+    --card: #111715;
+    --card-nested: #16201c;
+    --border: rgba(226, 232, 240, 0.09);
+    --border-hover: rgba(226, 232, 240, 0.2);
+    --accent: #10b981;
+    --accent-text: #34d399;
+    --accent-glow: rgba(16, 185, 129, 0.18);
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.55), 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+    --shadow-elevated: 0 12px 32px -4px rgba(0, 0, 0, 0.75), 0 2px 8px 0 rgba(0, 0, 0, 0.5);
+  }
+  [data-theme="light"] {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --card-nested: #f1f5f9;
+    --border: rgba(15, 23, 42, 0.08);
+    --border-hover: rgba(15, 23, 42, 0.18);
+    --accent: #059669;
+    --accent-text: #047857;
+    --accent-glow: rgba(5, 150, 105, 0.14);
+    --text: #0f172a;
+    --muted: #475569;
+    --shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 4px 14px -2px rgba(15, 23, 42, 0.05);
+    --shadow-elevated: 0 8px 24px -4px rgba(15, 23, 42, 0.09), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    padding: 1.25rem;
+    max-width: 740px;
+    margin: 0 auto;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--accent-text); }
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent-text); }
+
+  header {
+    text-align: center;
+    padding: 1rem 0 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .badge {
+    display: inline-block;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent-text);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  h1 { font-size: 1.45rem; font-weight: 800; color: var(--text); margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+  p.sub { font-size: 0.875rem; color: var(--muted); }
+  
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-elevated);
+  }
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text);
+  }
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 4px 14px var(--accent-glow);
+    transition: transform 0.15s ease, background 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px var(--accent-glow);
+  }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: color-mix(in srgb, var(--accent) 12%, var(--card-nested));
+    color: var(--accent-text);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    padding: 0.45rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  }
+  .btn-secondary:hover {
+    background: color-mix(in srgb, var(--accent) 20%, var(--card-nested));
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .btn-secondary:active { transform: scale(0.97); }
+
+  .links-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.625rem;
+    margin-top: 0.75rem;
+  }
+  @media (min-width: 500px) {
+    .links-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .mirror-link {
+    background: var(--card-nested);
+    border: 1px solid var(--border);
+    padding: 0.75rem;
+    border-radius: 0.625rem;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  }
+  .mirror-link:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+  }
+  .mirror-name { font-size: 0.8125rem; font-weight: 700; color: var(--text); }
+  .mirror-url { font-size: 0.6875rem; color: var(--muted); word-break: break-all; font-family: monospace; }
+  
+  .file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card-nested);
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .file-name {
+    font-family: monospace;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .file-badge {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-vdc { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+  .badge-irs { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+  .badge-eel { background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+  
+  .steps-box {
+    background: color-mix(in srgb, var(--accent) 5%, var(--card-nested));
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+    padding: 0.875rem 1rem;
+    border-radius: 0.625rem;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--muted);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .steps-box ol { padding-left: 1.25rem; margin-top: 0.375rem; }
+  .steps-box li { margin-bottom: 0.35rem; line-height: 1.6; }
+  .steps-box strong { color: var(--text); }
+  
+  #statusToast {
+    display: none;
+    background: var(--card-nested);
+    color: var(--accent-text);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--accent);
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="/" class="nav-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to Studio Analysis &amp; Live Verification
+  </a>
+  <button id="themeToggleBtn" class="theme-toggle" type="button" aria-label="Toggle light and dark theme">
+    <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+  </button>
+</div>
+
+<header>
+  <div class="badge">Google Audio Lab Verified DSP</div>
+  <h1>Direct Android Download Center</h1>
+  <p class="sub">RootlessJamesDSP &amp; RootlessZachDSP 48000 Hz Profile Suite</p>
+</header>
+
+<div id="statusToast">Starting direct download... check your notifications / downloads.</div>
+
+<!-- Instant In-Memory Direct Blob Downloader -->
+<div class="card" style="border-color: color-mix(in srgb, var(--accent) 40%, var(--border));">
+  <div class="card-title" style="color: var(--accent-text);">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+    Recommended: 1-Tap Offline In-Memory Download
+  </div>
+  <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 0.875rem;">
+    Generates and saves <code>Finalized_Champion_DSP_Trios.zip</code> directly inside your mobile browser. Bypasses all server redirects, network blocks, or iframe download restrictions.
+  </p>
+  <button id="directBlobBtn" class="btn-primary" onclick="triggerBlobDownload()">
+    <span>Download Champion Bundle (.zip)</span>
+  </button>
+</div>
+
+<!-- Primary Direct Server URLs -->
+<div class="card">
+  <div class="card-title">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    Direct HTTPS Mirrors (Server Hosted)
+  </div>
+  <p style="font-size: 0.8125rem; color: var(--muted);">
+    If tapping inside an app preview is restricted, long-press or copy any mirror below and paste into <strong>Google Chrome</strong> or <strong>Firefox</strong> on Android:
+  </p>
+  
+  <div class="links-grid">
+    <a class="mirror-link" href="/Finalized_Champion_DSP_Trios.zip" download="Finalized_Champion_DSP_Trios.zip">
+      <span class="mirror-name">Mirror 1 (Local Cloud Run)</span>
+      <span class="mirror-url">/Finalized_Champion_DSP_Trios.zip</span>
+    </a>
+    <a class="mirror-link" href="/Google_Grade_HyperAudio_DSP.zip" download="Google_Grade_HyperAudio_DSP.zip">
+      <span class="mirror-name">Mirror 2 (Reference Core Zip)</span>
+      <span class="mirror-url">/Google_Grade_HyperAudio_DSP.zip</span>
+    </a>
+  </div>
+</div>
+
+<!-- GitHub External Mirrors -->
+<div class="card">
+  <div class="card-title">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+    External GitHub Source Repositories
+  </div>
+  <div class="links-grid">
+    <a class="mirror-link" href="https://github.com/nmstudioo/HyperAudioo" target="_blank" rel="noopener">
+      <span class="mirror-name">HyperAudio Official GitHub Repo</span>
+      <span class="mirror-url">github.com/nmstudioo/HyperAudioo</span>
+    </a>
+    <a class="mirror-link" href="https://github.com/Zfkirke0109/RootlessZachDSP" target="_blank" rel="noopener">
+      <span class="mirror-name">RootlessZachDSP Android Engine</span>
+      <span class="mirror-url">github.com/Zfkirke0109/RootlessZachDSP</span>
+    </a>
+  </div>
+</div>
+
+<!-- Individual Files Breakdown -->
+<div class="card">
+  <div class="card-title">Individual File Direct Download</div>
+  <p style="font-size: 0.8125rem; color: var(--muted); margin-bottom: 0.75rem;">
+    Prefer downloading single files directly onto Android without unzipping:
+  </p>
+
+  <h4 style="font-size: 0.8125rem; color: #34d399; margin: 0.75rem 0 0.375rem;">1. IEM Champion Trio (V10 Reference Master)</h4>
+  <div class="file-list">
+    <div class="file-item">
+      <span class="file-name">EDX_v10.vdc <span class="file-badge badge-vdc">DDC</span></span>
+      <a class="btn-secondary" href="/dsp/iem_v10/EDX_v10.vdc" download="EDX_v10.vdc">Download</a>
+    </div>
+    <div class="file-item">
+      <span class="file-name">EDX_v10.irs <span class="file-badge badge-irs">IRS</span></span>
+      <a class="btn-secondary" href="/dsp/iem_v10/EDX_v10.irs" download="EDX_v10.irs">Download</a>
+    </div>
+    <div class="file-item">
+      <span class="file-name">EDX_v10.eel <span class="file-badge badge-eel">EEL</span></span>
+      <a class="btn-secondary" href="/dsp/iem_v10/EDX_v10.eel" download="EDX_v10.eel">Download</a>
+    </div>
+  </div>
+
+  <h4 style="font-size: 0.8125rem; color: #34d399; margin: 1.25rem 0 0.375rem;">2. IEM Alternative Trio (V4 Immersive Spatial HRIR)</h4>
+  <div class="file-list">
+    <div class="file-item">
+      <span class="file-name">EDX_v4.vdc <span class="file-badge badge-vdc">DDC</span></span>
+      <a class="btn-secondary" href="/dsp/iem_v4/EDX_v4.vdc" download="EDX_v4.vdc">Download</a>
+    </div>
+    <div class="file-item">
+      <span class="file-name">EDX_v4_HRIRxCrossfeed.irs <span class="file-badge badge-irs">IRS</span></span>
+      <a class="btn-secondary" href="/dsp/iem_v4/EDX_v4_HRIRxCrossfeed.irs" download="EDX_v4_HRIRxCrossfeed.irs">Download</a>
+    </div>
+    <div class="file-item">
+      <span class="file-name">EDX_v4.eel <span class="file-badge badge-eel">EEL</span></span>
+      <a class="btn-secondary" href="/dsp/iem_v4/EDX_v4.eel" download="EDX_v4.eel">Download</a>
+    </div>
+  </div>
+
+  <h4 style="font-size: 0.8125rem; color: #38bdf8; margin: 1.25rem 0 0.375rem;">3. Phone Speaker Champion Trio (V10 Acoustic Master)</h4>
+  <div class="file-list">
+    <div class="file-item">
+      <span class="file-name">SPK_v10.vdc <span class="file-badge badge-vdc">DDC</span></span>
+      <a class="btn-secondary" href="/dsp/spk_v10/SPK_v10.vdc" download="SPK_v10.vdc">Download</a>
+    </div>
+    <div class="file-item">
+      <span class="file-name">SPK_v10.irs <span class="file-badge badge-irs">IRS</span></span>
+      <a class="btn-secondary" href="/dsp/spk_v10/SPK_v10.irs" download="SPK_v10.irs">Download</a>
+    </div>
+    <div class="file-item">
+      <span class="file-name">SPK_v10.eel <span class="file-badge badge-eel">EEL</span></span>
+      <a class="btn-secondary" href="/dsp/spk_v10/SPK_v10.eel" download="SPK_v10.eel">Download</a>
+    </div>
+  </div>
+
+  <h4 style="font-size: 0.8125rem; color: #38bdf8; margin: 1.25rem 0 0.375rem;">4. Phone Speaker Alternative Trio (V8 Surround Cinema)</h4>
+  <div class="file-list">
+    <div class="file-item">
+      <span class="file-name">SPK_v8_OG.vdc <span class="file-badge badge-vdc">DDC</span></span>
+      <a class="btn-secondary" href="/dsp/spk_v8/SPK_v8_OG.vdc" download="SPK_v8_OG.vdc">Download</a>
+    </div>
+    <div class="file-item">
+      <span class="file-name">SPK_v8_S.irs <span class="file-badge badge-irs">IRS</span></span>
+      <a class="btn-secondary" href="/dsp/spk_v8/SPK_v8_S.irs" download="SPK_v8_S.irs">Download</a>
+    </div>
+    <div class="file-item">
+      <span class="file-name">SPK_v8.eel <span class="file-badge badge-eel">EEL</span></span>
+      <a class="btn-secondary" href="/dsp/spk_v8/SPK_v8.eel" download="SPK_v8.eel">Download</a>
+    </div>
+  </div>
+</div>
+
+<!-- Android Installation Steps -->
+<div class="card">
+  <div class="card-title">Android Loading Instructions</div>
+  <div class="steps-box">
+    <ol>
+      <li>Unzip or download your desired Trio files into your Android <code>Download</code> folder.</li>
+      <li>Open <strong>RootlessJamesDSP</strong> or <strong>RootlessZachDSP</strong>.</li>
+      <li>Under <strong>DDC</strong>: Toggle ON &rarr; Tap "Load DDC file" &rarr; Select the <code>.vdc</code> file.</li>
+      <li>Under <strong>Convolver</strong>: Toggle ON &rarr; Tap "Select impulse response" &rarr; Select the <code>.irs</code> file.</li>
+      <li>Under <strong>Liveprog</strong>: Toggle ON &rarr; Tap "Load custom script" &rarr; Select the <code>.eel</code> file.</li>
+      <li>In App Settings, ensure host sample rate is locked to <strong>48000 Hz</strong>.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- Android FAQ Card -->
+<div class="card">
+  <div class="card-title">Frequently Asked Questions</div>
+  <details style="margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+    <summary style="font-size: 0.8125rem; font-weight: 700; cursor: pointer; color: var(--text);">How do I use RootlessJamesDSP without root?</summary>
+    <p style="font-size: 0.8125rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.6;">
+      No root is needed. Grant the audio capture permission once via ADB (<code>adb shell pm grant me.bmax.apatch android.permission.CAPTURE_AUDIO_OUTPUT</code>) or wirelessly using Shizuku. Then lock the host sample rate to 48000 Hz in the app settings.
+    </p>
+  </details>
+  <details style="margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+    <summary style="font-size: 0.8125rem; font-weight: 700; cursor: pointer; color: var(--text);">What is the exact loading order for the 3 files?</summary>
+    <p style="font-size: 0.8125rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.6;">
+      1) Load <code>.vdc</code> into DDC for parametric biquad target tuning. 2) Load <code>.irs</code> into Convolver with Preamp at 0.0 dB. 3) Load <code>.eel</code> into Liveprog for lookahead peak limiting and driver protection. Turn off other OEM equalizers.
+    </p>
+  </details>
+  <details style="margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+    <summary style="font-size: 0.8125rem; font-weight: 700; cursor: pointer; color: var(--text);">Why is the host sample rate locked to 48 kHz?</summary>
+    <p style="font-size: 0.8125rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.6;">
+      Android's AudioFlinger mixer runs natively at 48000 Hz. Matching 48 kHz natively prevents asynchronous rate-conversion artifacts, phase smearing, and audio latency jitter.
+    </p>
+  </details>
+</div>
+
+<script>
+const B64_ZIP = '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';
+
+function triggerBlobDownload() {
+  const toast = document.getElementById('statusToast');
+  toast.style.display = 'block';
+  toast.innerText = 'Creating file blob in browser...';
+  
+  try {
+    const byteCharacters = atob(B64_ZIP);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/zip' });
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Finalized_Champion_DSP_Trios.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      toast.innerText = 'Download started! File saved to Downloads.';
+      setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }, 500);
+  } catch (err) {
+    toast.innerText = 'Falling back to direct server link...';
+    window.location.href = '/Finalized_Champion_DSP_Trios.zip';
+  }
+}
+
+// Theme Switcher for Android Download Center
+const themeBtn = document.getElementById('themeToggleBtn');
+function updateThemeIcon(t) {
+  const icon = document.getElementById('themeIcon');
+  if (!icon) return;
+  if (t === 'light') {
+    icon.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
+  }
+}
+updateThemeIcon(document.documentElement.dataset.theme);
+if (themeBtn) {
+  themeBtn.onclick = function() {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.theme = next; } catch(e) {}
+    updateThemeIcon(next);
+  };
+}
+</script>
+
+</body>
+</html>

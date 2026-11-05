@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="HyperAudio">
+<title>HyperAudio</title>
+<defs>
+<linearGradient id="t" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#182420"/>
+<stop offset="100%" stop-color="#090d0c"/>
+</linearGradient>
+<radialGradient id="g" cx=".82" cy=".18" r=".75">
+<stop offset="0%" stop-color="#10b981" stop-opacity=".25"/>
+<stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="acc" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#34d399"/>
+<stop offset="100%" stop-color="#059669"/>
+</linearGradient>
+</defs>
+<rect width="512" height="512" rx="116" fill="url(#t)"/>
+<rect width="512" height="512" rx="116" fill="url(#g)"/>
+<rect x="4" y="4" width="504" height="504" rx="112" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2.5"/>
+<!-- H letterform -->
+<path d="M100 118h40v196h-40zM196 118h40v196h-40zM140 210h56v32h-56z" fill="#f8fafc"/>
+<!-- A letterform with precision Google Emerald gradient -->
+<path d="M328 118H366L418 314H376L348 206L320 314H278Z" fill="url(#acc)"/>
+<path d="M330 260H364L370 284H324Z" fill="url(#acc)"/>
+<!-- High-fidelity minimum-phase acoustic impulse response waveform -->
+<path d="M92.0 382.0 L104.0 380.8 L116.0 377.8 L128.0 375.3 L134.0 375.0 L146.0 377.1 L158.0 382.0 L170.0 388.1 L182.0 393.9 L197.0 397.7 L212.0 393.2 L227.0 378.4 L242.0 360.3 L254.0 352.4 L257.0 352.0 L260.0 352.4 L272.0 360.3 L287.0 378.4 L302.0 393.2 L317.0 397.7 L332.0 393.9 L347.0 386.6 L362.0 379.3 L377.0 375.2 L383.0 375.0 L395.0 377.0 L407.0 380.2 L422.0 382.0" fill="none" stroke="url(#acc)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
